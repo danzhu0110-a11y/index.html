@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>六月打卡 · Elsie</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+:root {
+  --bg: #F5F3EE;
+  --card: #FFFFFF;
+  --border: #E8E5DE;
+  --text: #1A1A18;
+  --muted: #888780;
+  --hint: #B4B2A9;
+  --teal: #1D9E75;
+  --teal-light: #E1F5EE;
+  --amber: #EF9F27;
+  --amber-light: #FAEEDA;
+  --purple: #7F77DD;
+  --purple-light: #EEEDFE;
+  --blue: #378ADD;
+  --blue-light: #E6F1FB;
+  --coral: #D85A30;
+  --coral-light: #FAECE7;
+  --red: #E24B4A;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans SC', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 0 0 60px;
+}
+
+.header {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 20px 16px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.header-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.header h1 {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.header-sub {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.stat {
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 8px 6px;
+  text-align: center;
+}
+
+.stat-n {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+
+.stat-l {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.section {
+  padding: 0 12px;
+  margin-top: 16px;
+}
+
+.section-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  margin-bottom: 10px;
+  padding-left: 2px;
+}
+
+.cal-grid {
+  background: var(--card);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.dow-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom: 1px solid var(--border);
+}
+
+.dow {
+  font-size: 11px;
+  color: var(--hint);
+  text-align: center;
+  padding: 8px 0;
+}
+
+.days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: var(--border);
+}
+
+.day-cell {
+  background: var(--card);
+  padding: 6px 3px 5px;
+  min-height: 58px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.1s;
+}
+
+.day-cell:active { background: var(--bg); }
+.day-cell.future { cursor: default; }
+.day-cell.empty { background: var(--bg); cursor: default; }
+
+.day-num {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  line-height: 1;
+}
+
+.day-cell.today .day-num {
+  background: var(--teal);
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+}
+
+.day-cell.future .day-num { color: var(--hint); }
+
+.dots {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+.day-pct-bar {
+  width: 80%;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--border);
+  overflow: hidden;
+  margin-top: auto;
+}
+
+.day-pct-fill {
+  height: 100%;
+  border-radius: 1px;
+  background: var(--teal);
+}
+
+/* Recap */
+.recap-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recap-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.recap-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.recap-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.recap-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 5px;
+}
+
+.recap-bar {
+  height: 5px;
+  border-radius: 3px;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.recap-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+.recap-right {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.recap-pct {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.recap-count {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+/* Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 200;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--card);
+  border-radius: 20px 20px 0 0;
+  padding: 20px 20px 40px;
+  width: 100%;
+  max-width: 480px;
+  animation: slideUp 0.25s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  margin: 0 auto 16px;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.modal-date {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.modal-close {
+  background: var(--bg);
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.check-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.1s, border-color 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.check-item.checked {
+  background: var(--teal-light);
+  border-color: #9FE1CB;
+}
+
+.check-marker {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.check-item.checked .check-marker {
+  background: var(--teal);
+  border-color: var(--teal);
+}
+
+.check-tick {
+  display: none;
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.check-item.checked .check-tick { display: block; }
+
+.check-color-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.check-text {
+  font-size: 14px;
+  color: var(--text);
+  flex: 1;
+}
+
+.save-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  background: var(--teal);
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+
+.save-btn:active { opacity: 0.85; }
+
+/* Legend tags */
+.legend-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.leg-tag {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3px 8px;
+}
+
+.leg-d {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <h1>六月打卡 🌿</h1>
+    <span class="header-sub" id="hdr-sub">2026年6月</span>
+  </div>
+  <div class="stats-row">
+    <div class="stat"><div class="stat-n" id="s-days">0</div><div class="stat-l">打卡天数</div></div>
+    <div class="stat"><div class="stat-n" id="s-streak">0</div><div class="stat-l">连续打卡</div></div>
+    <div class="stat"><div class="stat-n" id="s-avg">0%</div><div class="stat-l">平均完成</div></div>
+    <div class="stat"><div class="stat-n" id="s-left">30</div><div class="stat-l">剩余天数</div></div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:16px">
+  <div class="section-title">六月日历</div>
+  <div class="legend-row">
+    <span class="leg-tag"><span class="leg-d" style="background:#1D9E75"></span>健康习惯</span>
+    <span class="leg-tag"><span class="leg-d" style="background:#EF9F27"></span>运动</span>
+    <span class="leg-tag"><span class="leg-d" style="background:#7F77DD"></span>成长学习</span>
+    <span class="leg-tag"><span class="leg-d" style="background:#378ADD"></span>书影音</span>
+    <span class="leg-tag"><span class="leg-d" style="background:#D85A30"></span>工作创新</span>
+  </div>
+  <div class="cal-grid">
+    <div class="dow-row">
+      <div class="dow">日</div><div class="dow">一</div><div class="dow">二</div>
+      <div class="dow">三</div><div class="dow">四</div><div class="dow">五</div><div class="dow">六</div>
+    </div>
+    <div class="days-grid" id="days-grid"></div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:20px">
+  <div class="section-title">月度复盘</div>
+  <div class="recap-list" id="recap-list"></div>
+</div>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-date" id="modal-date">6月1日</div>
+      <button class="modal-close" id="modal-close">✕</button>
+    </div>
+    <div class="check-list" id="check-list"></div>
+    <button class="save-btn" id="save-btn">保存今日打卡</button>
+  </div>
+</div>
+
+<script>
+const ITEMS = [
+  {id:'med',   label:'早晚涂药',         color:'#1D9E75'},
+  {id:'foot',  label:'泡脚祛湿（15min）', color:'#1D9E75'},
+  {id:'sleep', label:'23:30前入睡',       color:'#1D9E75'},
+  {id:'sport', label:'运动（游泳/健身）',  color:'#EF9F27'},
+  {id:'learn', label:'工具学习（CC/NLM）', color:'#7F77DD'},
+  {id:'read',  label:'读书/观影/看展',     color:'#378ADD'},
+  {id:'work',  label:'工作创新推进',       color:'#D85A30'},
+];
+
+const STORE_KEY = 'june2026_tracker';
+let data = {};
+try { data = JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); } catch(e) {}
+
+const today = new Date();
+const todayD = today.getDate();
+const isJune = today.getMonth() === 5 && today.getFullYear() === 2026;
+const currentDay = isJune ? todayD : 1;
+
+function save() { localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
+function key(d) { return 'd' + d; }
+function getPct(d) {
+  const v = data[key(d)];
+  if (!v) return 0;
+  const done = ITEMS.filter(it => v[it.id]).length;
+  return Math.round(done / ITEMS.length * 100);
+}
+
+function buildCal() {
+  const grid = document.getElementById('days-grid');
+  grid.innerHTML = '';
+  const firstDow = new Date(2026, 5, 1).getDay();
+  for (let i = 0; i < firstDow; i++) {
+    const el = document.createElement('div');
+    el.className = 'day-cell empty';
+    grid.appendChild(el);
+  }
+  for (let d = 1; d <= 30; d++) {
+    const cell = document.createElement('div');
+    const isFuture = d > currentDay;
+    cell.className = 'day-cell' + (isFuture ? ' future' : '') + (d === currentDay ? ' today' : '');
+
+    const num = document.createElement('div');
+    num.className = 'day-num';
+    num.textContent = d;
+    cell.appendChild(num);
+
+    const v = data[key(d)];
+    if (v) {
+      const dots = document.createElement('div');
+      dots.className = 'dots';
+      ITEMS.forEach(it => {
+        if (v[it.id]) {
+          const dot = document.createElement('div');
+          dot.className = 'dot';
+          dot.style.background = it.color;
+          dots.appendChild(dot);
+        }
+      });
+      cell.appendChild(dots);
+
+      const p = getPct(d);
+      const bar = document.createElement('div');
+      bar.className = 'day-pct-bar';
+      const fill = document.createElement('div');
+      fill.className = 'day-pct-fill';
+      fill.style.width = p + '%';
+      bar.appendChild(fill);
+      cell.appendChild(bar);
+    }
+
+    if (!isFuture) {
+      cell.addEventListener('click', () => openModal(d));
+    }
+    grid.appendChild(cell);
+  }
+}
+
+function buildRecap() {
+  const list = document.getElementById('recap-list');
+  list.innerHTML = '';
+  const days = currentDay;
+  ITEMS.forEach(it => {
+    let count = 0;
+    for (let d = 1; d <= days; d++) {
+      const v = data[key(d)];
+      if (v && v[it.id]) count++;
+    }
+    const p = days > 0 ? Math.round(count / days * 100) : 0;
+    const item = document.createElement('div');
+    item.className = 'recap-item';
+    item.innerHTML = `
+      <div class="recap-dot" style="background:${it.color}"></div>
+      <div class="recap-info">
+        <div class="recap-name">${it.label}</div>
+        <div class="recap-bar"><div class="recap-fill" style="width:${p}%;background:${it.color}"></div></div>
+      </div>
+      <div class="recap-right">
+        <div class="recap-pct" style="color:${it.color}">${p}%</div>
+        <div class="recap-count">${count}/${days}天</div>
+      </div>`;
+    list.appendChild(item);
+  });
+}
+
+function buildStats() {
+  let checked = 0, totalPct = 0, streak = 0;
+  for (let d = 1; d <= currentDay; d++) {
+    const p = getPct(d);
+    if (p > 0) { checked++; totalPct += p; }
+  }
+  for (let d = currentDay; d >= 1; d--) {
+    if (getPct(d) > 0) streak++; else break;
+  }
+  document.getElementById('s-days').textContent = checked;
+  document.getElementById('s-streak').textContent = streak;
+  document.getElementById('s-avg').textContent = checked > 0 ? Math.round(totalPct / checked) + '%' : '0%';
+  document.getElementById('s-left').textContent = Math.max(0, 30 - currentDay);
+}
+
+let editDay = null;
+let tempState = {};
+
+function openModal(d) {
+  editDay = d;
+  document.getElementById('modal-date').textContent = `6月${d}日`;
+  const saved = data[key(d)] || {};
+  tempState = {};
+  ITEMS.forEach(it => { tempState[it.id] = !!saved[it.id]; });
+
+  const list = document.getElementById('check-list');
+  list.innerHTML = '';
+  ITEMS.forEach(it => {
+    const item = document.createElement('div');
+    item.className = 'check-item' + (tempState[it.id] ? ' checked' : '');
+    item.dataset.id = it.id;
+    item.innerHTML = `
+      <div class="check-marker"><span class="check-tick">✓</span></div>
+      <div class="check-color-dot" style="background:${it.color}"></div>
+      <div class="check-text">${it.label}</div>`;
+    item.addEventListener('click', () => {
+      tempState[it.id] = !tempState[it.id];
+      item.classList.toggle('checked', tempState[it.id]);
+    });
+    list.appendChild(item);
+  });
+
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  editDay = null;
+}
+
+document.getElementById('save-btn').addEventListener('click', () => {
+  if (editDay === null) return;
+  data[key(editDay)] = { ...tempState };
+  save();
+  closeModal();
+  buildCal();
+  buildRecap();
+  buildStats();
+});
+
+document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+});
+
+buildCal();
+buildRecap();
+buildStats();
+</script>
+</body>
+</html>
